@@ -1,0 +1,15 @@
+# Ignore virtual environments
+venv/
+backend/venv/
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore node_modules (for frontend)
+node_modules/
+
+# Ignore environment files
+.env
