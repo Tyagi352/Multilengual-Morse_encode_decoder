@@ -1,215 +1,73 @@
-import React, { useState } from "react";
+import React from "react";
+import { Link } from "react-router-dom";
 
-const API_BASE = "http://localhost:5000";
-
-export default function HomePage({ token, setToken }) {
-  const [text, setText] = useState("");
-  const [file, setFile] = useState(null);
-  const [decoded, setDecoded] = useState("");
-  const [message, setMessage] = useState("");
-  const [language, setLanguage] = useState("english");
-  const [fileToEncode, setFileToEncode] = useState(null);
-
-  const languages = ["english", "hindi", "marathi", "french"];
-
-  // Unicode validation regex
-  const languageSets = {
-    english: /^[A-Za-z0-9\s.,!?]*$/,
-    hindi: /^[\u0900-\u097F\s0-9।,!?]*$/,  // Devanagari
-    marathi: /^[\u0900-\u097F\s0-9।,!?]*$/, // Devanagari
-    french: /^[\u0000-\uFFFF]*$/           // all unicode
-  };
-
-  const validateText = (inputText) => {
-    const normalized = inputText.normalize("NFC");
-    const regex = languageSets[language];
-    return regex.test(normalized);
-  };
-
-  const logout = () => { 
-    localStorage.removeItem("token"); 
-    setToken(""); 
-    setMessage("Logged out"); 
-  };
-
-  const encodeText = async () => {
-    if (!token) { setMessage("Please login"); return; }
-    if (!text) { setMessage("Please enter text"); return; }
-    if (!validateText(text)) { setMessage(`Invalid characters for ${language}`); return; }
-
-    try {
-      const res = await fetch(`${API_BASE}/encode`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` 
-        },
-        body: JSON.stringify({ text, language })
-      });
-
-      if (res.ok) {
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "morse.enc";
-        a.click();
-        setMessage("Text encoded & downloaded!");
-      } else {
-        const data = await res.json();
-        setMessage(data.error || "Encoding failed");
-      }
-    } catch (err) {
-      setMessage("Server error");
-    }
-  };
-
-  const encodeTextFile = async () => {
-    if (!fileToEncode) return;
-    const fileContent = await fileToEncode.text();
-    if (!validateText(fileContent)) { setMessage("Invalid characters in file"); return; }
-
-    try {
-      const res = await fetch(`${API_BASE}/encode`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` 
-        },
-        body: JSON.stringify({ text: fileContent, language })
-      });
-
-      if (res.ok) {
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "morse.enc";
-        a.click();
-        setMessage("File encoded & downloaded!");
-      } else {
-        const data = await res.json();
-        setMessage(data.error || "Encoding failed");
-      }
-    } catch (err) {
-      setMessage("Server error");
-    }
-  };
-
-  const decodeFile = async () => {
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("language", language);
-
-    try {
-      const res = await fetch(`${API_BASE}/decode`, {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${token}` },
-        body: formData
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setDecoded(data.decoded_text);
-        setMessage("File decoded successfully!");
-      } else {
-        setDecoded("");
-        setMessage(data.error || "Decoding failed");
-      }
-    } catch (err) {
-      setMessage("Server error");
-    }
-  };
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen flex bg-gray-900 text-white p-6">
-      <div className="w-64 bg-gray-800 p-4 rounded space-y-4">
-        <h2 className="font-bold">Select Language</h2>
-        {languages.map(lang => (
-          <button
-            key={lang}
-            onClick={() => setLanguage(lang)}
-            className={`w-full px-3 py-1 rounded ${language===lang ? "bg-purple-600" : "bg-gray-700"}`}
-          >
-            {lang}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex-1 ml-6 space-y-4">
-        {/* Logout */}
-        <div className="space-y-2 p-4 bg-gray-800 rounded flex items-center justify-between">
-          <span>Logged in</span>
-          <button
-            onClick={logout}
-            className="px-4 py-2 bg-red-600 rounded hover:bg-red-700"
-          >
-            Logout
-          </button>
+    <div className="min-h-screen bg-white text-black">
+      <div className="container mx-auto p-8">
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold mb-4">Morse Code Encoder</h1>
+          <p className="text-xl text-gray-600">
+            A powerful tool to encode and decode Morse code with ease.
+          </p>
         </div>
 
-        {/* Encode Text */}
-        <div className="space-y-2 p-4 bg-gray-800 rounded">
-          <h2 className="text-lg font-bold">Encode Text</h2>
-          <textarea
-            placeholder="Enter text to encode"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className="w-full p-2 rounded bg-gray-700 text-white h-24 resize-none"
-          />
-          <button
-            onClick={encodeText}
-            className="px-4 py-2 bg-purple-600 rounded hover:bg-purple-700"
-          >
-            Encode & Download
-          </button>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+          <div className="bg-gray-100 p-6 rounded-lg shadow-lg">
+            <h2 className="text-3xl font-bold mb-4">Features</h2>
+            <ul className="space-y-4 text-lg">
+              <li>
+                <strong>Multi-language Support:</strong> Encode and decode in
+                English, Hindi, Marathi, and French.
+              </li>
+              <li>
+                <strong>Text and File Processing:</strong> Handle both direct
+                text input and file uploads for encoding and decoding.
+              </li>
+              <li>
+                <strong>Secure Authentication:</strong> User accounts are
+                protected with JWT-based authentication.
+              </li>
+              <li>
+                <strong>Intuitive Interface:</strong> A clean and user-friendly
+                design for a seamless experience.
+              </li>
+            </ul>
+          </div>
+          <div className="bg-gray-100 p-6 rounded-lg shadow-lg">
+            <h2 className="text-3xl font-bold mb-4">How it Works</h2>
+            <p className="text-lg">
+              Our application uses a sophisticated algorithm to convert text to
+              Morse code and vice versa. Simply enter your text or upload a
+              file, select the desired language, and let our tool do the rest.
+              The encoded files are downloaded in a secure `.enc` format, and
+              decoded text is displayed directly on the dashboard.
+            </p>
+          </div>
         </div>
 
-        {/* Encode File */}
-        <div className="space-y-2 p-4 bg-gray-800 rounded">
-          <h2 className="text-lg font-bold">Encode File</h2>
-          <input
-            type="file"
-            accept=".txt"
-            onChange={(e) => setFileToEncode(e.target.files[0])}
-            className="w-full p-2 rounded bg-gray-700 text-white"
-          />
-          <button
-            onClick={encodeTextFile}
-            className="px-4 py-2 bg-purple-600 rounded hover:bg-purple-700"
+        <div className="text-center">
+          <Link
+            to="/dashboard"
+            className="inline-block px-8 py-4 text-xl font-bold text-white bg-black rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
           >
-            Encode File & Download
-          </button>
+            Get Started
+          </Link>
         </div>
 
-        {/* Decode File */}
-        <div className="space-y-2 p-4 bg-gray-800 rounded">
-          <h2 className="text-lg font-bold">Decode File</h2>
-          <input
-            type="file"
-            accept=".enc"
-            onChange={(e) => setFile(e.target.files[0])}
-            className="w-full p-2 rounded bg-gray-700 text-white"
-          />
-          <button
-            onClick={decodeFile}
-            className="px-4 py-2 bg-purple-600 rounded hover:bg-purple-700"
-          >
-            Decode
-          </button>
-          {decoded && (
-            <textarea
-              readOnly
-              value={decoded}
-              className="w-full p-2 rounded bg-gray-700 text-white h-24 resize-none mt-2"
-            />
-          )}
+        <div className="mt-16 text-center text-gray-600">
+          <h2 className="text-3xl font-bold mb-4">Contact Us</h2>
+          <p className="text-lg">
+            Have questions or feedback? Reach out to us at{" "}
+            <a
+              href="mailto:contact@morseencoder.com"
+              className="text-black hover:underline"
+            >
+              contact@morseencoder.com
+            </a>
+            .
+          </p>
         </div>
-
-        {message && (
-          <div className="p-2 bg-gray-700 rounded text-yellow-400">{message}</div>
-        )}
       </div>
     </div>
   );
