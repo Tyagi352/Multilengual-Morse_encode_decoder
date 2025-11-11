@@ -1,0 +1,7 @@
+Flask
+Flask-Cors
+cryptography
+PyJWT
+werkzeug
+Flask-SocketIO==5.3.6
+eventlet
