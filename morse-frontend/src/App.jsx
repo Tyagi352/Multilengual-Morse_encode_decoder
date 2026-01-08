@@ -3,7 +3,11 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./Dashboard";
 import HomePage from "./HomePage";
 import AuthPage from "./AuthPage";
-import EncodeFile from "./components/EncodeFile";
+import DashboardPage from "./pages/DashboardPage";
+import EncodeFilePage from "./pages/EncodeFilePage";
+import DecodeFilePage from "./pages/DecodeFilePage";
+import SentFilesPage from "./pages/SentFilesPage";
+import ReceivedFilesPage from "./pages/ReceivedFilesPage";
 
 function ProtectedRoute({ token, children }) {
   if (!token) {
@@ -19,15 +23,20 @@ export default function App() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/auth" element={<AuthPage setToken={setToken} />} />
-      <Route path="/EncodeFile" element={<EncodeFile />} />
       <Route
         path="/dashboard"
         element={
           <ProtectedRoute token={token}>
-            <Dashboard token={token} setToken={setToken} />
+            <DashboardPage token={token} setToken={setToken} />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<Dashboard token={token} setToken={setToken} />} />
+  <Route path="encode" element={<EncodeFilePage />} />
+  <Route path="decode" element={<DecodeFilePage />} />
+        <Route path="sent" element={<SentFilesPage />} />
+        <Route path="received" element={<ReceivedFilesPage />} />
+      </Route>
     </Routes>
   );
 }

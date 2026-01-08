@@ -1,79 +1,149 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+
+const API_BASE = "http://localhost:5000";
 
 export default function SharedWithMe({ token }) {
   const [files, setFiles] = useState([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const fetchFiles = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/shared/received', {
+      const res = await fetch(`${API_BASE}/api/files/received`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
+
       const data = await res.json();
       if (res.ok) {
         setFiles(data);
       } else {
-        setError(data.error || 'Failed to fetch files');
+        setError(data.error || "FAILED TO LOAD INBOUND LOGS");
       }
-    } catch (err) {
-      setError('Server error');
+    } catch {
+      setError("SERVER COMMUNICATION FAILURE");
     }
   };
 
   useEffect(() => {
-    if (token) {
-      fetchFiles();
-    }
+    if (token) fetchFiles();
   }, [token]);
 
-  const handleDecode = async (file) => {
+  const handleDownload = async (file) => {
     try {
-        const res = await fetch('http://localhost:5000/api/decode-shared', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({ file_id: file.id }),
-        });
+      const res = await fetch(`${API_BASE}/api/files/download/${file.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.file_name || "shared.enc";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } else {
         const data = await res.json();
-        if (res.ok) {
-            alert(`Decoded Text:\n\n${data.decoded_text}`);
-        } else {
-            alert(`Error: ${data.error}`);
-        }
-    } catch (err) {
-        alert('A server error occurred during decoding.');
+        alert(data.error || "DOWNLOAD FAILED");
+      }
+    } catch {
+      alert("DOWNLOAD SERVER ERROR");
     }
   };
 
   return (
-    <div className="bg-gray-100 p-6 rounded-lg shadow-lg mt-8">
-      <h2 className="text-2xl font-bold mb-4">Shared With Me</h2>
-      {error && <p className="text-red-500">{error}</p>}
-      <div className="space-y-3">
-        {files.length > 0 ? (
-          files.map((file) => (
-            <div key={file.id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow">
-              <div>
-                <p className="font-semibold">{file.fileName}</p>
-                <p className="text-sm text-gray-500">From: {file.sender_username}</p>
-                {file.message && <p className="text-sm text-gray-600 mt-1"><em>Message: {file.message}</em></p>}
-              </div>
-              <button
-                onClick={() => handleDecode(file)}
-                className="px-4 py-2 font-bold text-white bg-black rounded-lg hover:bg-gray-800"
-              >
-                Decode
-              </button>
-            </div>
-          ))
-        ) : (
-          <p className="text-gray-500">No files have been shared with you.</p>
-        )}
+    <div className="min-h-screen bg-[#0C0A09] text-[#FAFAF9] flex flex-col justify-between">
+      <div className="container mx-auto px-8 py-10">
+
+        {/* HEADER */}
+        <div className="mb-8 text-center animate-fade-in">
+          <h1 className="text-3xl font-extrabold tracking-widest text-[#FACC15]">
+            FILES RECEIVED
+          </h1>
+          <p className="mt-2 text-sm tracking-wide text-[#A8A29E] max-w-xl mx-auto">
+            View all incoming files shared with you. Download securely and keep track of all transmissions.
+          </p>
+        </div>
+
+        {/* FILE LOGS */}
+        <div className="bg-[#1C1917] border border-[#44403C] rounded-xl p-6 animate-slide-in-up">
+          <h2 className="text-xl font-bold tracking-widest text-[#FACC15] mb-4">
+            INBOUND TRANSMISSIONS
+          </h2>
+
+          {error && (
+            <p className="mb-4 text-sm font-bold tracking-wider text-red-400 animate-fade-in">
+              ⚠ {error}
+            </p>
+          )}
+
+          <div className="space-y-3">
+            {files.length > 0 ? (
+              files.map((file, index) => (
+                <div
+                  key={file.id}
+                  className="flex items-center justify-between
+                             bg-[#0C0A09] border border-[#44403C]
+                             p-4 rounded-md animate-slide-in-left"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div>
+                    <p className="font-bold tracking-wide text-[#FACC15]">
+                      {file.file_name}
+                    </p>
+                    <p className="text-xs tracking-widest text-[#A8A29E]">
+                      SOURCE: {file.sender.toUpperCase()}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => handleDownload(file)}
+                    className="px-4 py-2 text-xs font-bold tracking-widest
+                               bg-[#1e3a1e] text-[#b6ffb6]
+                               border border-[#2f6b2f] rounded-md
+                               hover:bg-[#295229] hover:scale-[1.02]
+                               transition-transform"
+                  >
+                    DOWNLOAD
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm tracking-widest text-[#A8A29E] animate-fade-in">
+                NO INCOMING FILES
+              </p>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Footer */}
+      <footer className="mt-12 py-6 text-center text-sm text-[#A8A29E] border-t border-[#44403C] animate-fade-in">
+        © 2026 SecureMorse. All rights reserved. Monitor your incoming files and download securely.
+      </footer>
+
+      {/* Animations */}
+      <style jsx>{`
+        .animate-fade-in { animation: fadeIn 1s ease-in-out; }
+        .animate-slide-in-left { animation: slideInLeft 0.8s ease-out forwards; }
+        .animate-slide-in-up { animation: slideInUp 0.8s ease-out forwards; }
+
+        @keyframes fadeIn {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        @keyframes slideInLeft {
+          0% { opacity: 0; transform: translateX(-30px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideInUp {
+          0% { opacity: 0; transform: translateY(30px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
