@@ -40,9 +40,9 @@ export default function AuthPage({ setToken }) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-center text-black">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0C0A09]">
+      <div className="w-full max-w-md p-8 space-y-8 bg-[#1C1917] border border-[#44403C] rounded-xl shadow-lg animate-fade-in">
+        <h1 className="text-3xl font-extrabold text-center text-[#FACC15]">
           {isLogin ? "Login" : "Register"}
         </h1>
         <form onSubmit={handleAuth} className="space-y-6">
@@ -52,7 +52,7 @@ export default function AuthPage({ setToken }) {
               placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 bg-white border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full px-4 py-2 bg-[#0C0A09] border border-[#44403C] text-[#FAFAF9] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FACC15]"
               required
             />
           )}
@@ -61,7 +61,7 @@ export default function AuthPage({ setToken }) {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 bg-white border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+            className="w-full px-4 py-2 bg-[#0C0A09] border border-[#44403C] text-[#FAFAF9] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FACC15]"
             required
           />
           <input
@@ -69,24 +69,24 @@ export default function AuthPage({ setToken }) {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 bg-white border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+            className="w-full px-4 py-2 bg-[#0C0A09] border border-[#44403C] text-[#FAFAF9] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FACC15]"
             required
           />
           <button
             type="submit"
-            className="w-full px-4 py-2 font-bold text-white bg-black rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+            className="w-full px-4 py-2 font-bold text-black bg-[#FACC15] rounded-lg hover:bg-[#EAB308] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FACC15] transition-all duration-300"
           >
             {isLogin ? "Login" : "Register"}
           </button>
           {message && (
             <p className="mt-4 text-center text-red-500">{message}</p>
           )}
-          <p className="mt-6 text-center text-black">
+          <p className="mt-6 text-center text-[#A8A29E]">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="font-medium text-black hover:underline"
+              className="font-medium text-[#FACC15] hover:underline"
             >
               {isLogin ? "Register" : "Login"}
             </button>

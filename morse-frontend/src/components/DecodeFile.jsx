@@ -113,6 +113,10 @@ export default function DecodeFile({ token }) {
               >
                 EXECUTE DECODE
               </button>
+
+              <button>
+                
+              </button>
             </div>
 
             {/* Output */}

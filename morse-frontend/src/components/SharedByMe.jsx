@@ -6,6 +6,31 @@ export default function SharedByMe({ token }) {
   const [files, setFiles] = useState([]);
   const [error, setError] = useState("");
 
+  const revokeAccess = async (fileId) => {
+  try {
+    const res = await fetch(`${API_BASE}/api/files/revoke/${fileId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      // Optionally remove the file from the local list to update UI
+      setFiles((prev) => prev.filter((file) => file.id !== fileId));
+    } else {
+      setError(data.error || "FAILED TO REVOKE ACCESS");
+    }
+  } catch (error) {
+    setError("SERVER ERROR: FAILED TO REVOKE ACCESS");
+    console.error(error);
+  }
+};
+
+
   useEffect(() => {
     const fetchFiles = async () => {
       try {
@@ -75,7 +100,7 @@ export default function SharedByMe({ token }) {
                     </p>
                   </div>
 
-                  <button
+                  <button onClick={revokeAccess.bind(null, file.id)}
                     className="px-4 py-2 text-xs font-bold tracking-widest
                                bg-[#4a1e1e] text-[#ffb3b3]
                                rounded-md border border-[#7a2f2f]
